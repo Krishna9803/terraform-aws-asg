@@ -1,7 +1,7 @@
 provider "aws" {
   region     = "us-east-1"
   access_key = "*********************"
-  secret_key = "********************************"
+  secret_key = "***************************************"
 }
 
 module "autoscaling" {
@@ -50,21 +50,6 @@ module "autoscaling" {
   #     heartbeat_timeout = 300
   #   }
   # ]
-
-  # Optional: Scaling policies thresholds
-  cpu_scale_up_threshold   = 70
-  cpu_scale_down_threshold = 30
-
-  # Optional: Scheduled scaling
-  schedule_scale_up_min        = 2
-  schedule_scale_up_max        = 4
-  schedule_scale_up_desired    = 3
-  schedule_scale_up_recurrence = "0 9 * * MON-FRI"
-
-  schedule_scale_down_min        = 1
-  schedule_scale_down_max        = 2
-  schedule_scale_down_desired    = 1
-  schedule_scale_down_recurrence = "0 18 * * MON-FRI"
 
   # Optional: Hibernation and warm pool
   enable_hibernation = false
