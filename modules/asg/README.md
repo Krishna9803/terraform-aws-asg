@@ -20,6 +20,7 @@ No modules.
 | [aws_autoscaling_lifecycle_hook.hibernate_hook](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_policy.scale_down](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
 | [aws_autoscaling_policy.scale_up](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
+| [aws_autoscaling_policy.target_tracking](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_policy) | resource |
 | [aws_autoscaling_schedule.scale_down](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
 | [aws_autoscaling_schedule.scale_up](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
 | [aws_cloudwatch_metric_alarm.high_cpu](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
@@ -47,9 +48,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cpu_scale_down_threshold"></a> [cpu\_scale\_down\_threshold](#input\_cpu\_scale\_down\_threshold) | CPU utilization percentage to trigger scale-in | `number` | `30` | no |
-| <a name="input_cpu_scale_up_threshold"></a> [cpu\_scale\_up\_threshold](#input\_cpu\_scale\_up\_threshold) | CPU utilization percentage to trigger scale-out | `number` | `70` | no |
-| <a name="input_desired_capacity"></a> [desired\_capacity](#input\_desired\_capacity) | Initial desired capacity | `number` | `2` | no |
+| <a name="input_desired_capacity"></a> [desired\_capacity](#input\_desired\_capacity) | Initial desired capacity | `number` | `3` | no |
 | <a name="input_ebs_optimized"></a> [ebs\_optimized](#input\_ebs\_optimized) | Whether the EC2 instance is EBS-optimized | `bool` | `false` | no |
 | <a name="input_enable_hibernation"></a> [enable\_hibernation](#input\_enable\_hibernation) | Enable instance hibernation on scale-in | `bool` | `false` | no |
 | <a name="input_health_check_type"></a> [health\_check\_type](#input\_health\_check\_type) | Health check type for ASG (EC2 or ELB) | `string` | `"EC2"` | no |
@@ -57,21 +56,13 @@ No modules.
 | <a name="input_initial_lifecycle_hooks"></a> [initial\_lifecycle\_hooks](#input\_initial\_lifecycle\_hooks) | List of lifecycle hook configurations | <pre>list(object({<br/>    name              = string<br/>    transition        = string<br/>    default_result    = optional(string)<br/>    heartbeat_timeout = optional(number)<br/>    notification_arn  = optional(string)<br/>    role_arn          = optional(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | EC2 instance type | `string` | `"t3.micro"` | no |
 | <a name="input_key_name"></a> [key\_name](#input\_key\_name) | The EC2 key pair name for SSH access | `string` | `null` | no |
-| <a name="input_max_size"></a> [max\_size](#input\_max\_size) | Maximum number of instances | `number` | `3` | no |
-| <a name="input_min_size"></a> [min\_size](#input\_min\_size) | Minimum number of instances | `number` | `1` | no |
+| <a name="input_max_size"></a> [max\_size](#input\_max\_size) | Maximum number of instances | `number` | `4` | no |
+| <a name="input_min_size"></a> [min\_size](#input\_min\_size) | Minimum number of instances | `number` | `2` | no |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Resource name prefix | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The region in which we are creating the auto scaling group | `string` | `"us-east-1"` | no |
 | <a name="input_root_volume_encrypted"></a> [root\_volume\_encrypted](#input\_root\_volume\_encrypted) | Whether to encrypt the root volume | `bool` | `true` | no |
 | <a name="input_root_volume_size"></a> [root\_volume\_size](#input\_root\_volume\_size) | Size of the root volume in GB | `number` | `20` | no |
 | <a name="input_root_volume_type"></a> [root\_volume\_type](#input\_root\_volume\_type) | Type of root volume (e.g., gp3, gp2) | `string` | `"gp3"` | no |
-| <a name="input_schedule_scale_down_desired"></a> [schedule\_scale\_down\_desired](#input\_schedule\_scale\_down\_desired) | Desired capacity for scheduled scale-down | `number` | `1` | no |
-| <a name="input_schedule_scale_down_max"></a> [schedule\_scale\_down\_max](#input\_schedule\_scale\_down\_max) | Maximum size for scheduled scale-down | `number` | `2` | no |
-| <a name="input_schedule_scale_down_min"></a> [schedule\_scale\_down\_min](#input\_schedule\_scale\_down\_min) | Minimum size for scheduled scale-down | `number` | `1` | no |
-| <a name="input_schedule_scale_down_recurrence"></a> [schedule\_scale\_down\_recurrence](#input\_schedule\_scale\_down\_recurrence) | Cron expression for scale-down schedule | `string` | `"0 18 * * MON-FRI"` | no |
-| <a name="input_schedule_scale_up_desired"></a> [schedule\_scale\_up\_desired](#input\_schedule\_scale\_up\_desired) | Desired capacity for scheduled scale-up | `number` | `3` | no |
-| <a name="input_schedule_scale_up_max"></a> [schedule\_scale\_up\_max](#input\_schedule\_scale\_up\_max) | Maximum size for scheduled scale-up | `number` | `4` | no |
-| <a name="input_schedule_scale_up_min"></a> [schedule\_scale\_up\_min](#input\_schedule\_scale\_up\_min) | Minimum size for scheduled scale-up | `number` | `2` | no |
-| <a name="input_schedule_scale_up_recurrence"></a> [schedule\_scale\_up\_recurrence](#input\_schedule\_scale\_up\_recurrence) | Cron expression for scale-up schedule | `string` | `"0 9 * * MON-FRI"` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | List of security group IDs | `list(string)` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of subnet IDs for ASG | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Resource tags | `map(string)` | `{}` | no |
