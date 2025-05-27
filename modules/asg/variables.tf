@@ -27,19 +27,19 @@ variable "subnet_ids" {
 variable "max_size" {
   description = "Maximum number of instances"
   type        = number
-  default     = 3
+  default     = 4
 }
 
 variable "min_size" {
   description = "Minimum number of instances"
   type        = number
-  default     = 1
+  default     = 2
 }
 
 variable "desired_capacity" {
   description = "Initial desired capacity"
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "target_group_arns" {
@@ -113,67 +113,6 @@ variable "termination_policies" {
   description = "List of termination policies for ASG"
   type        = list(string)
   default     = ["Default"]
-}
-
-variable "cpu_scale_up_threshold" {
-  description = "CPU utilization percentage to trigger scale-out"
-  type        = number
-  default     = 70
-}
-
-variable "cpu_scale_down_threshold" {
-  description = "CPU utilization percentage to trigger scale-in"
-  type        = number
-  default     = 30
-}
-
-# Scaling schedule variables
-variable "schedule_scale_up_min" {
-  description = "Minimum size for scheduled scale-up"
-  type        = number
-  default     = 2
-}
-
-variable "schedule_scale_up_max" {
-  description = "Maximum size for scheduled scale-up"
-  type        = number
-  default     = 4
-}
-
-variable "schedule_scale_up_desired" {
-  description = "Desired capacity for scheduled scale-up"
-  type        = number
-  default     = 3
-}
-
-variable "schedule_scale_up_recurrence" {
-  description = "Cron expression for scale-up schedule"
-  type        = string
-  default     = "0 9 * * MON-FRI" # 9 AM UTC weekdays
-}
-
-variable "schedule_scale_down_min" {
-  description = "Minimum size for scheduled scale-down"
-  type        = number
-  default     = 1
-}
-
-variable "schedule_scale_down_max" {
-  description = "Maximum size for scheduled scale-down"
-  type        = number
-  default     = 2
-}
-
-variable "schedule_scale_down_desired" {
-  description = "Desired capacity for scheduled scale-down"
-  type        = number
-  default     = 1
-}
-
-variable "schedule_scale_down_recurrence" {
-  description = "Cron expression for scale-down schedule"
-  type        = string
-  default     = "0 18 * * MON-FRI" # 6 PM UTC weekdays
 }
 
 variable "enable_hibernation" {
