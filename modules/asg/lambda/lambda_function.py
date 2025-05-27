@@ -14,6 +14,7 @@ def lambda_handler(event, context):
         logger.info(f"Received event: {json.dumps(event)}")
         message = json.loads(event['Records'][0]['Sns']['Message'])
         
+        # Validating required fields
         required_fields = ['EC2InstanceId', 'AutoScalingGroupName', 'LifecycleHookName']
         missing = [field for field in required_fields if field not in message]
         if missing:
@@ -23,41 +24,48 @@ def lambda_handler(event, context):
         asg_name = message['AutoScalingGroupName']
         hook_name = message['LifecycleHookName']
 
-        # Verify instance state
-        instance = ec2.describe_instances(InstanceIds=[instance_id])
-        state = instance['Reservations'][0]['Instances'][0]['State']['Name']
-        if state != 'running':
-            logger.error(f"Instance {instance_id} is in {state} state, skipping")
-            return
+        # Checking instance hibernation support
+        instance_info = ec2.describe_instances(InstanceIds=[instance_id])
+        hibernation_supported = instance_info['Reservations'][0]['Instances'][0]['HibernationOptions']['Configured']
+        
+        if not hibernation_supported:
+            logger.error(f"Instance {instance_id} does not support hibernation")
+            raise ValueError("Instance not configured for hibernation")
 
-        # Attempt hibernation with retries
-        for attempt in range(3):
-            try:
-                ec2.stop_instances(
-                    InstanceIds=[instance_id],
-                    Hibernate=True,
-                    DryRun=False  # Remove after testing
-                )
-                logger.info(f"Successfully hibernated {instance_id}")
-                break
-            except ClientError as e:
-                if e.response['Error']['Code'] == 'DryRunOperation':
-                    logger.warning("Dry run succeeded")
-                    break
-                if attempt == 2:
-                    raise
-                logger.warning(f"Attempt {attempt+1} failed: {e}")
-                continue
+        # Sending heartbeat every 2 minutes until timeout
+        asg.record_lifecycle_action_heartbeat(
+            LifecycleHookName=hook_name,
+            AutoScalingGroupName=asg_name,
+            InstanceId=instance_id
+        )
 
-        # Complete lifecycle action
+        # Attempt hibernation
+        try:
+            ec2.stop_instances(
+                InstanceIds=[instance_id],
+                Hibernate=True
+            )
+            logger.info(f"Successfully initiated hibernation for {instance_id}")
+        except ClientError as e:
+            logger.error(f"Hibernation failed: {str(e)}")
+            raise
+
+        # Complete lifecycle action after successful hibernation
         asg.complete_lifecycle_action(
             LifecycleHookName=hook_name,
             AutoScalingGroupName=asg_name,
-            LifecycleActionResult='ABANDON',
+            LifecycleActionResult='CONTINUE',  
             InstanceId=instance_id
         )
-        logger.info("Lifecycle action abandoned successfully")
+        logger.info("Lifecycle action completed successfully")
 
     except Exception as e:
-        logger.error(f"Critical error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
+        # Force complete action to prevent stuck instances
+        asg.complete_lifecycle_action(
+            LifecycleHookName=hook_name,
+            AutoScalingGroupName=asg_name,
+            LifecycleActionResult='CONTINUE',
+            InstanceId=instance_id
+        )
         raise
