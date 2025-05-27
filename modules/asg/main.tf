@@ -1,5 +1,9 @@
+provider "aws"{
+    region = "us-east-1"
+}
+
 resource "aws_launch_template" "this" {
-  name_prefix   = "${var.name_prefix}-lt-"
+  name     = "test-asg-lt"
   image_id      = var.image_id
   instance_type = var.instance_type
   key_name      = var.key_name
@@ -16,7 +20,7 @@ resource "aws_launch_template" "this" {
       encrypted             = var.root_volume_encrypted
       delete_on_termination = var.enable_hibernation ? false : true
     }
-  }
+  } 
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2.name
@@ -28,7 +32,7 @@ resource "aws_launch_template" "this" {
   }
 
   hibernation_options {
-    configured = var.enable_hibernation
+    configured = true
   }
 
   lifecycle {
@@ -94,4 +98,16 @@ resource "aws_autoscaling_group" "this" {
 # SNS Topic
 resource "aws_sns_topic" "lifecycle_notifications" {
   name = "${var.name_prefix}-lifecycle-topic"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect    = "Allow",
+        Principal = { Service = "autoscaling.amazonaws.com" },
+        Action    = "sns:Publish",
+        Resource  = "arn:aws:sns:${var.region}:${data.aws_caller_identity.current.account_id}:${var.name_prefix}-lifecycle-topic"
+      }
+    ]
+  })
 }
