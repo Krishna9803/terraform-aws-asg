@@ -28,8 +28,8 @@ resource "aws_autoscaling_lifecycle_hook" "hibernate_hook" {
   name                    = "${var.name_prefix}-hibernate-hook"
   autoscaling_group_name  = aws_autoscaling_group.this.name
   lifecycle_transition    = "autoscaling:EC2_INSTANCE_TERMINATING"
-  default_result          = "CONTINUE"
-  heartbeat_timeout       = 600
+  default_result          = "ABANDON"
+  heartbeat_timeout       = 1800
   notification_target_arn = aws_sns_topic.lifecycle_notifications.arn
   role_arn                = aws_iam_role.lambda_exec.arn
 
